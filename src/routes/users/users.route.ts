@@ -1,9 +1,11 @@
 import { createRoute, z } from "@hono/zod-openapi";
 import * as HttpStatusCodes from "stoker/http-status-codes";
+import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
-import { createErrorSchema } from "stoker/openapi/schemas";
+import { createErrorSchema, IdParamsSchema } from "stoker/openapi/schemas";
 
 import { insertUsersSchema, selectUsersSchema } from "@/db/schema";
+import { notFoundSchema } from "@/lib/constants/constants";
 
 export const list = createRoute({
   tags: ["Users"],
@@ -40,5 +42,31 @@ export const create = createRoute({
   },
 });
 
+export const getOne = createRoute({
+  path: "/users/{id}",
+  tags: ["Users"],
+  summary: "Get User Details",
+  description: "Get user details.",
+  method: "get",
+  requests: {
+    params: IdParamsSchema,
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      selectUsersSchema,
+      "User details.",
+    ),
+    [HttpStatusCodes.NOT_FOUND]: jsonContent(
+      notFoundSchema,
+      HttpStatusPhrases.NOT_FOUND,
+    ),
+    [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
+      createErrorSchema(IdParamsSchema),
+      "Invalid id parameter.",
+    ),
+  },
+});
+
 export type TListRoute = typeof list;
 export type TCreateRoute = typeof create;
+export type TGetOneRoute = typeof getOne;

@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
 import * as HttpStatusCodes from "stoker/http-status-codes";
+import * as HttpStatusPhrases from "stoker/http-status-phrases";
 
 import type { TRouteHandler } from "@/lib/types/app-types";
-import type { TCreateRoute, TListRoute } from "@/routes/users/users.route";
+import type { TCreateRoute, TGetOneRoute, TListRoute } from "@/routes/users/users.route";
 
 import { db } from "@/db";
 import { users } from "@/db/schema";
@@ -41,6 +42,32 @@ export const create: TRouteHandler<TCreateRoute> = async (c) => {
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
     });
+
+  return c.json(user, HttpStatusCodes.OK);
+};
+
+export const getOne: TRouteHandler<TGetOneRoute> = async (c) => {
+  const { id } = c.req.param();
+
+  const user = await db.query.users.findFirst({
+    where: (users, { eq }) => eq(users.id, id),
+    columns: {
+      id: true,
+      email: true,
+      username: true,
+      isActive: true,
+      isVerified: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  if (!user) {
+    return c.json(
+      { message: HttpStatusPhrases.NOT_FOUND },
+      HttpStatusCodes.NOT_FOUND,
+    );
+  }
 
   return c.json(user, HttpStatusCodes.OK);
 };
