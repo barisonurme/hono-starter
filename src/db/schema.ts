@@ -7,7 +7,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { createSelectSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const users = pgTable(
   "users",
@@ -36,4 +36,18 @@ export const users = pgTable(
   ],
 );
 
-export const selectUsersSchema = createSelectSchema(users);
+export const selectUsersSchema = createSelectSchema(users).omit({
+  passwordHash: true,
+});
+
+export const insertUsersSchema = createInsertSchema(users, {
+  username: schema => schema.min(3),
+  email: schema => schema.email(),
+  passwordHash: schema => schema.min(8),
+}).omit({
+  id: true,
+  isActive: true,
+  isVerified: true,
+  createdAt: true,
+  updatedAt: true,
+});
