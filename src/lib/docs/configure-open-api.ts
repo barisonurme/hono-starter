@@ -1,6 +1,6 @@
 import { Scalar } from "@scalar/hono-api-reference";
 
-import type { TOpenApi } from "./app-types";
+import type { TOpenApi } from "../types/app-types";
 
 import packageJson from "../../../package.json";
 
