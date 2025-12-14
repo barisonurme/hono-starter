@@ -7,6 +7,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { createSelectSchema } from "drizzle-zod";
 
 export const users = pgTable(
   "users",
@@ -34,3 +35,5 @@ export const users = pgTable(
     index("users_username_idx").on(t.username),
   ],
 );
+
+export const selectUsersSchema = createSelectSchema(users);
