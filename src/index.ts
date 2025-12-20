@@ -2,12 +2,12 @@ import env from "@/core/env";
 import index from "@/routes/index.route";
 import userIndex from "@/routes/users/users.index";
 
-import createRouter from "./core/app/create-app";
+import { CreateApp } from "./core/app/create-app";
 import { configureOpenAPI } from "./core/docs/configure-open-api";
 
 const port = Number.parseInt(env.PORT || "3000", 10);
 
-const app = createRouter();
+const app = CreateApp();
 
 configureOpenAPI(app);
 
