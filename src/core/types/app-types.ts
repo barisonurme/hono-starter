@@ -10,3 +10,8 @@ export type TAppBindings = {
 export type TOpenApi = OpenAPIHono<TAppBindings>;
 
 export type TRouteHandler<T extends RouteConfig> = RouteHandler<T, TAppBindings>;
+
+export type PostgresError = {
+  code?: string;
+  constraint?: string;
+};
