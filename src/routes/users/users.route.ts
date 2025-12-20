@@ -4,8 +4,8 @@ import * as HttpStatusPhrases from "stoker/http-status-phrases";
 import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema, IdParamsSchema } from "stoker/openapi/schemas";
 
+import { notFoundSchema } from "@/core/constants/constants";
 import { insertUsersSchema, selectUsersSchema } from "@/db/schema";
-import { notFoundSchema } from "@/lib/constants/constants";
 
 export const list = createRoute({
   tags: ["Users"],

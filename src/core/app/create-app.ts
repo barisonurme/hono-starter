@@ -1,10 +1,11 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { notFound, onError, serveEmojiFavicon } from "stoker/middlewares";
+import { notFound, serveEmojiFavicon } from "stoker/middlewares";
 import { defaultHook } from "stoker/openapi";
 
-import type { TAppBindings } from "@/lib/types/app-types";
+import type { TAppBindings } from "@/core/types/app-types";
 
-import { pinoLog } from "@/middleware/pino-logger";
+import { logger } from "@/core/logger";
+import { errorHandler } from "@/middlewares/error-handler.middleware";
 
 export default function createRouter() {
   return new OpenAPIHono<TAppBindings>({
@@ -15,10 +16,10 @@ export default function createRouter() {
 
 export function CreateApp() {
   const app = createRouter();
-  app.use(pinoLog());
+  app.use(logger());
   app.use(serveEmojiFavicon("🚀"));
 
-  app.onError(onError);
+  app.onError(errorHandler);
   app.notFound(notFound);
 
   return app;

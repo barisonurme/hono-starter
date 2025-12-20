@@ -1,10 +1,10 @@
-import createRouter from "@/lib/app/create-app";
-import * as handlers from "@/routes/users/users.handlers";
+import * as controllers from "@/controllers/user.controller";
+import createRouter from "@/core/app/create-app";
 import * as routers from "@/routes/users/users.route";
 
 const route = createRouter()
-  .openapi(routers.list, handlers.list)
-  .openapi(routers.create, handlers.create)
-  .openapi(routers.getOne, handlers.getOne);
+  .openapi(routers.list, controllers.list)
+  .openapi(routers.create, controllers.create)
+  .openapi(routers.getOne, controllers.getOne);
 
 export default route;

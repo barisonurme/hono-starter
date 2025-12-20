@@ -1,9 +1,9 @@
-import env from "@/env";
+import env from "@/core/env";
 import index from "@/routes/index.route";
 import userIndex from "@/routes/users/users.index";
 
-import createRouter from "./lib/app/create-app";
-import { configureOpenAPI } from "./lib/docs/configure-open-api";
+import createRouter from "./core/app/create-app";
+import { configureOpenAPI } from "./core/docs/configure-open-api";
 
 const port = Number.parseInt(env.PORT || "3000", 10);
 

@@ -3,7 +3,7 @@ import * as HttpStatusCodes from "stoker/http-status-codes";
 import { jsonContent } from "stoker/openapi/helpers";
 import { createMessageObjectSchema } from "stoker/openapi/schemas";
 
-import createRouter from "@/lib/app/create-app";
+import createRouter from "@/core/app/create-app";
 
 const router = createRouter().openapi(createRoute({
   tags: ["System"],

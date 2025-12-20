@@ -1,12 +1,12 @@
+// Utilities and helpers
 import { pinoLogger } from "hono-pino";
 import { pino } from "pino";
 import pretty from "pino-pretty";
 
-import env from "@/env";
+import env from "@/core/env";
 
-export function pinoLog() {
+export function logger() {
   return pinoLogger({
-
     pino: pino({
       level: env.LOG_LEVEL || "info",
     }, env.NODE_ENV === "production" ? undefined : pretty()),
@@ -15,3 +15,4 @@ export function pinoLog() {
     },
   });
 }
+
