@@ -7,4 +7,4 @@ export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
 export type UserPublic = Omit<User, "passwordHash">;
-
+export type UserPrivate = User;

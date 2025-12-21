@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 // User repository: handles all DB operations for users
 import { db } from "@/db";
 import { users } from "@/db/user-db-schema";
+import { verifyPassword } from "@/utils";
 
 export class UserRepository {
   findAll({ limit, offset, isActive }: { limit?: number; offset?: number; isActive?: boolean } = {}) {
@@ -48,6 +49,22 @@ export class UserRepository {
         isVerified: true,
         createdAt: true,
         updatedAt: true,
+      },
+    });
+  }
+
+  findByEmailWithPassword(email: string) {
+    return db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.email, email),
+      columns: {
+        id: true,
+        email: true,
+        username: true,
+        isActive: true,
+        isVerified: true,
+        createdAt: true,
+        updatedAt: true,
+        passwordHash: true,
       },
     });
   }
@@ -113,6 +130,19 @@ export class UserRepository {
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
     });
+  }
+
+  async validatePasswordWithEmail(email: string, password: string) {
+    const user = await this.findByEmailWithPassword(email);
+    if (!user) {
+      return false;
+    }
+
+    if (!user) {
+      return false;
+    }
+
+    return verifyPassword(password, user.passwordHash);
   }
 
   deleteUser(id: string) {

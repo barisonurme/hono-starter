@@ -1,4 +1,5 @@
 import env from "@/core/env";
+import authIndex from "@/routes/auth/auth.index";
 import index from "@/routes/index.route";
 import userIndex from "@/routes/users/users.index";
 
@@ -13,7 +14,7 @@ const app = CreateApp();
 
 configureOpenAPI(app);
 
-const routes = [index, userIndex];
+const routes = [index, authIndex, userIndex];
 
 routes.forEach((route) => {
   app.route("/", route);

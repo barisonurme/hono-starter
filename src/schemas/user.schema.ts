@@ -6,6 +6,18 @@ import { users } from "@/db/user-db-schema";
 // User schemas extracted from db/schema.ts
 // These are the Zod schemas used for validation (single source of truth)
 
+export const loginUserSchema = createInsertSchema(users, {
+  email: schema => schema.email(),
+  passwordHash: schema => schema.min(8),
+}).omit({
+  id: true,
+  isActive: true,
+  isVerified: true,
+  createdAt: true,
+  updatedAt: true,
+  username: true,
+});
+
 export const createUserSchema = createInsertSchema(users, {
   username: schema => schema.min(3),
   email: schema => schema.email(),

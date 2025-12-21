@@ -1,14 +1,13 @@
 // Business logic (no HTTP details)
-import bcrypt from "bcryptjs";
 
 import type { UserPublic } from "@/models/user.model";
 import type { CreateUserInput, UpdateUserInput } from "@/schemas/user.schema";
 
-import { BCRYPT_ROUNDS, POSTGRES_UNIQUE_VIOLATION_CODE } from "@/core/constants/constants";
+import { POSTGRES_UNIQUE_VIOLATION_CODE } from "@/core/constants/constants";
 import { ConflictException, NotFoundException } from "@/exceptions/http-exceptions";
 import { userRepository } from "@/models/user.repo";
 
-import { isPostgresError } from "..";
+import { hashPassword, isPostgresError } from "../utils";
 
 export type FindAllOptions = {
   limit?: number;
@@ -97,7 +96,7 @@ export class UserService {
     }
 
     // Hash the password (field name suggests it's already hashed, but we hash it here)
-    const passwordHash = await bcrypt.hash(data.passwordHash, BCRYPT_ROUNDS);
+    const passwordHash = await hashPassword(data.passwordHash);
 
     try {
       const [user] = await userRepository.insertUser({
@@ -160,7 +159,7 @@ export class UserService {
 
     // Hash password if provided (field name suggests it's already hashed, but we hash it here)
     if (data.passwordHash) {
-      updateData.passwordHash = await bcrypt.hash(data.passwordHash, BCRYPT_ROUNDS);
+      updateData.passwordHash = await hashPassword(data.passwordHash);
     }
 
     // Only update if there's something to update
