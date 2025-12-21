@@ -22,10 +22,6 @@ export class AuthService {
       throw new NotFoundException("Password is required");
     }
 
-    if (!user) {
-      throw new NotFoundException("User not found");
-    }
-
     const isPasswordValid = await userRepository.validatePasswordWithEmail(email, password);
 
     if (!isPasswordValid) {
