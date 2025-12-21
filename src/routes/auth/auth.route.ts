@@ -30,4 +30,38 @@ export const login = createRoute({
   },
 });
 
+export const logout = createRoute({
+  tags: ["Authentication"],
+  summary: "Logout User",
+  description: "Logout a user by clearing authentication cookies.",
+  path: "/auth/logout",
+  method: "post",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      createMessageObjectSchema("Logout successful"),
+      "User logout successful.",
+    ),
+  },
+});
+
+export const refresh = createRoute({
+  tags: ["Authentication"],
+  summary: "Refresh Access Token",
+  description: "Refresh the access token using the refresh token from cookies.",
+  path: "/auth/refresh",
+  method: "post",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      createMessageObjectSchema("Token refreshed successfully"),
+      "Access token refreshed successfully.",
+    ),
+    [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
+      createMessageObjectSchema("Invalid or expired refresh token"),
+      "Unauthorized - invalid or expired refresh token.",
+    ),
+  },
+});
+
 export type TLoginRoute = typeof login;
+export type TLogoutRoute = typeof logout;
+export type TRefreshRoute = typeof refresh;

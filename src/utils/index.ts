@@ -62,3 +62,13 @@ export function jwtGenerateRefreshToken(jwtPayload: jwt.JwtPayload, jwtOptions?:
     },
   );
 }
+
+export function jwtVerifyToken(token: string): jwt.JwtPayload {
+  try {
+    const decoded = jwt.verify(token, env.JWT_SECRET);
+    return decoded as jwt.JwtPayload;
+  }
+  catch {
+    throw new Error("Invalid or expired token");
+  }
+}

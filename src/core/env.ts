@@ -17,6 +17,7 @@ const EnvSchema = z.object({
   JWT_ACCESS_EXPIRES_IN: JwtExpiresInSchema,
   JWT_REFRESH_EXPIRES_IN: JwtExpiresInSchema,
   JWT_ISSUER: z.string().default("hono-starter"),
+  SESSION_ENCRYPTION_KEY: z.string().min(32),
   DATABASE_URL: z.url(),
   POSTGRES_USER: z.string(),
   POSTGRES_PASSWORD: z.string(),

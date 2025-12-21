@@ -1,8 +1,8 @@
 import type { UserPrivate, UserPublic } from "@/models/user.model";
 
-import { NotFoundException } from "@/exceptions/http-exceptions";
+import { NotFoundException, UnauthorizedException } from "@/exceptions/http-exceptions";
 import { userRepository } from "@/models/user.repo";
-import { jwtGenerateAccessToken, jwtGenerateRefreshToken } from "@/utils";
+import { jwtGenerateAccessToken, jwtGenerateRefreshToken, jwtVerifyToken } from "@/utils";
 
 export class AuthService {
   async validateUser(email: string, isLoginRequest?: boolean): Promise<UserPrivate> {
@@ -15,7 +15,11 @@ export class AuthService {
     return user;
   }
 
-  async validatePassword(email: string, password: string, isLoginRequest?: boolean): Promise<UserPublic> {
+  async validatePassword(
+    email: string,
+    password: string,
+    isLoginRequest?: boolean,
+  ): Promise<{ user: UserPublic; accessToken: string; refreshToken: string }> {
     const user = await this.validateUser(email, isLoginRequest);
 
     if (!password) {
@@ -36,8 +40,43 @@ export class AuthService {
     const accessToken = jwtGenerateAccessToken(jwtPayload);
     const refreshToken = jwtGenerateRefreshToken(jwtPayload);
 
-    // Warn: Type assertion here. Be cautious.
-    return { ...publicUser, accessToken, refreshToken } as UserPublic;
+    return {
+      user: publicUser,
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async refreshTokens(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+    try {
+      const decoded = jwtVerifyToken(refreshToken);
+
+      if (!decoded.id || !decoded.email) {
+        throw new UnauthorizedException("Invalid token payload");
+      }
+
+      // Verify user still exists
+      const user = await userRepository.findByEmail(decoded.email as string);
+      if (!user) {
+        throw new UnauthorizedException("User not found");
+      }
+
+      // Generate new tokens
+      const jwtPayload = { id: decoded.id, email: decoded.email };
+      const newAccessToken = jwtGenerateAccessToken(jwtPayload);
+      const newRefreshToken = jwtGenerateRefreshToken(jwtPayload);
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      };
+    }
+    catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException("Invalid or expired refresh token");
+    }
   }
 }
 

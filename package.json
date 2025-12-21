@@ -24,6 +24,7 @@
     "drizzle-zod": "^0.8.3",
     "hono": "^4.11.0",
     "hono-pino": "^0.10.3",
+    "hono-sessions": "^0.8.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.16.3",
     "pino": "^10.1.0",

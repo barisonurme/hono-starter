@@ -4,6 +4,10 @@ import type { PinoLogger } from "hono-pino";
 export type TAppBindings = {
   Variables: {
     logger: PinoLogger;
+    user?: {
+      id: string;
+      email: string;
+    };
   };
 };
 
