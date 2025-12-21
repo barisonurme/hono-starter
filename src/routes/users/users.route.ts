@@ -5,8 +5,7 @@ import { jsonContent, jsonContentRequired } from "stoker/openapi/helpers";
 import { createErrorSchema, createMessageObjectSchema, IdUUIDParamsSchema } from "stoker/openapi/schemas";
 
 import { notFoundSchema } from "@/core/constants/constants";
-import { insertUsersSchema, selectUsersSchema } from "@/db/schema";
-import { updateUserSchema } from "@/schemas/user.schema";
+import { insertUsersSchema, selectUsersSchema, updateUserSchema } from "@/schemas/user.schema";
 
 // Query parameters schema for list endpoint
 const listUsersQuerySchema = z.object({

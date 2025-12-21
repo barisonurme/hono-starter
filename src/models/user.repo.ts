@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 
 // User repository: handles all DB operations for users
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { users } from "@/db/user-db-schema";
 
 export class UserRepository {
   findAll({ limit, offset, isActive }: { limit?: number; offset?: number; isActive?: boolean } = {}) {
