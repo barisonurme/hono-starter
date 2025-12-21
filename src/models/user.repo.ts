@@ -138,10 +138,6 @@ export class UserRepository {
       return false;
     }
 
-    if (!user) {
-      return false;
-    }
-
     return verifyPassword(password, user.passwordHash);
   }
 
