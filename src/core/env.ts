@@ -7,6 +7,7 @@ import { z } from "zod";
 expand(config());
 
 const EnvSchema = z.object({
+  JWT_SECRET: z.string().min(32),
   DATABASE_URL: z.url(),
   POSTGRES_USER: z.string(),
   POSTGRES_PASSWORD: z.string(),
