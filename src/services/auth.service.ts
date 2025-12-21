@@ -1,8 +1,5 @@
-import type { SignOptions } from "jsonwebtoken";
-
 import type { UserPrivate, UserPublic } from "@/models/user.model";
 
-import env from "@/core/env";
 import { NotFoundException } from "@/exceptions/http-exceptions";
 import { userRepository } from "@/models/user.repo";
 import { jwtGenerateAccessToken, jwtGenerateRefreshToken } from "@/utils";
