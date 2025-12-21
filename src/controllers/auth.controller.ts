@@ -10,5 +10,6 @@ export const login: TRouteHandler<TLoginRoute> = async (c) => {
   const { email, passwordHash } = data;
 
   const user = await authService.validatePassword(email, passwordHash);
+
   return c.json(user, HttpStatusCodes.OK);
 };

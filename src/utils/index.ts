@@ -1,4 +1,7 @@
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+import env from "@/core/env";
 
 import type { PostgresError } from "../core/types/app-types";
 
@@ -30,4 +33,32 @@ export async function hashPassword(plainPassword: string) {
 
 export function verifyPassword(plainPassword: string, passwordHash: string) {
   return bcrypt.compare(plainPassword, passwordHash);
+}
+
+/*
+*
+* JWT Utils
+*
+*  */
+
+export function jwtGenerateAccessToken(jwtPayload: jwt.JwtPayload, jwtOptions?: jwt.SignOptions) {
+  return jwt.sign(
+    jwtPayload,
+    env.JWT_SECRET,
+    {
+      expiresIn: env.JWT_ACCESS_EXPIRES_IN,
+      ...jwtOptions,
+    },
+  );
+}
+
+export function jwtGenerateRefreshToken(jwtPayload: jwt.JwtPayload, jwtOptions?: jwt.SignOptions) {
+  return jwt.sign(
+    jwtPayload,
+    env.JWT_SECRET,
+    {
+      expiresIn: env.JWT_REFRESH_EXPIRES_IN,
+      ...jwtOptions,
+    },
+  );
 }

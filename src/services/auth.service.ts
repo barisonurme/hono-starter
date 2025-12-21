@@ -1,7 +1,11 @@
+import type { SignOptions } from "jsonwebtoken";
+
 import type { UserPrivate, UserPublic } from "@/models/user.model";
 
+import env from "@/core/env";
 import { NotFoundException } from "@/exceptions/http-exceptions";
 import { userRepository } from "@/models/user.repo";
+import { jwtGenerateAccessToken, jwtGenerateRefreshToken } from "@/utils";
 
 export class AuthService {
   async validateUser(email: string): Promise<UserPrivate> {
@@ -32,7 +36,15 @@ export class AuthService {
     }
 
     const { passwordHash: _password, ...publicUser } = user;
-    return publicUser as UserPublic;
+
+    /* Generate JWT tokens */
+    const jwtPayload = { id: user.id, email: user.email };
+
+    const accessToken = jwtGenerateAccessToken(jwtPayload);
+    const refreshToken = jwtGenerateRefreshToken(jwtPayload);
+
+    // Warn: Type assertion here. Be cautious.
+    return { ...publicUser, accessToken, refreshToken } as UserPublic;
   }
 }
 

@@ -1,3 +1,4 @@
+import type { SignOptions } from "jsonwebtoken";
 import type { ZodError } from "zod";
 
 import { config } from "dotenv";
@@ -6,8 +7,16 @@ import { z } from "zod";
 
 expand(config());
 
+const JwtExpiresInSchema = z.custom<SignOptions["expiresIn"]>(
+  val => typeof val === "string" || typeof val === "number",
+  { message: "Invalid JWT expiration format" },
+);
+
 const EnvSchema = z.object({
   JWT_SECRET: z.string().min(32),
+  JWT_ACCESS_EXPIRES_IN: JwtExpiresInSchema,
+  JWT_REFRESH_EXPIRES_IN: JwtExpiresInSchema,
+  JWT_ISSUER: z.string().default("hono-starter"),
   DATABASE_URL: z.url(),
   POSTGRES_USER: z.string(),
   POSTGRES_PASSWORD: z.string(),
