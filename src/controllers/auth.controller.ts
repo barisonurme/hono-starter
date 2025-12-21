@@ -9,7 +9,7 @@ export const login: TRouteHandler<TLoginRoute> = async (c) => {
   const data = c.req.valid("json");
   const { email, passwordHash } = data;
 
-  const user = await authService.validatePassword(email, passwordHash);
+  const user = await authService.validatePassword(email, passwordHash, true);
 
   return c.json(user, HttpStatusCodes.OK);
 };

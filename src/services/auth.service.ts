@@ -5,18 +5,18 @@ import { userRepository } from "@/models/user.repo";
 import { jwtGenerateAccessToken, jwtGenerateRefreshToken } from "@/utils";
 
 export class AuthService {
-  async validateUser(email: string): Promise<UserPrivate> {
+  async validateUser(email: string, isLoginRequest?: boolean): Promise<UserPrivate> {
     const user = await userRepository.findByEmailWithPassword(email);
 
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException(isLoginRequest ? "Invalid credentials" : "User not found");
     }
 
     return user;
   }
 
-  async validatePassword(email: string, password: string): Promise<UserPublic> {
-    const user = await this.validateUser(email);
+  async validatePassword(email: string, password: string, isLoginRequest?: boolean): Promise<UserPublic> {
+    const user = await this.validateUser(email, isLoginRequest);
 
     if (!password) {
       throw new NotFoundException("Password is required");
