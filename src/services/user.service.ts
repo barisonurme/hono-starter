@@ -1,25 +1,14 @@
 // Business logic (no HTTP details)
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
 
-import type { PostgresError } from "@/core/types/app-types";
 import type { UserPublic } from "@/models/user.model";
 import type { CreateUserInput, UpdateUserInput } from "@/schemas/user.schema";
 
 import { BCRYPT_ROUNDS, POSTGRES_UNIQUE_VIOLATION_CODE } from "@/core/constants/constants";
-import { db } from "@/db";
-import { users } from "@/db/schema";
 import { ConflictException, NotFoundException } from "@/exceptions/http-exceptions";
+import { userRepository } from "@/models/user.repo";
 
-// Type guard for PostgreSQL database errors
-function isPostgresError(error: unknown): error is PostgresError {
-  return (
-    typeof error === "object"
-    && error !== null
-    && "code" in error
-    && typeof (error as PostgresError).code === "string"
-  );
-}
+import { isPostgresError } from "..";
 
 export type FindAllOptions = {
   limit?: number;
@@ -34,42 +23,14 @@ export class UserService {
   async findAll(options: FindAllOptions = {}): Promise<UserPublic[]> {
     const { limit, offset, isActive } = options;
 
-    const query = db.query.users.findMany({
-      columns: {
-        id: true,
-        email: true,
-        username: true,
-        isActive: true,
-        isVerified: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-      where: isActive !== undefined
-        ? (users, { eq }) => eq(users.isActive, isActive)
-        : undefined,
-      limit,
-      offset,
-    });
-
-    return query;
+    return userRepository.findAll({ limit, offset, isActive });
   }
 
   /**
    * Find user by ID, throws NotFoundException if not found
    */
   async findById(id: string): Promise<UserPublic> {
-    const user = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.id, id),
-      columns: {
-        id: true,
-        email: true,
-        username: true,
-        isActive: true,
-        isVerified: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    const user = await userRepository.findById(id);
 
     if (!user) {
       throw new NotFoundException("User not found");
@@ -82,19 +43,7 @@ export class UserService {
    * Find user by ID, returns null if not found (for internal use)
    */
   async findByIdOrNull(id: string): Promise<UserPublic | null> {
-    const user = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.id, id),
-      columns: {
-        id: true,
-        email: true,
-        username: true,
-        isActive: true,
-        isVerified: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
+    const user = await userRepository.findById(id);
     return user || null;
   }
 
@@ -102,19 +51,7 @@ export class UserService {
    * Find user by email, returns null if not found
    */
   async findByEmail(email: string): Promise<UserPublic | null> {
-    const user = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.email, email),
-      columns: {
-        id: true,
-        email: true,
-        username: true,
-        isActive: true,
-        isVerified: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
+    const user = await userRepository.findByEmail(email);
     return user || null;
   }
 
@@ -122,19 +59,7 @@ export class UserService {
    * Find user by username, returns null if not found
    */
   async findByUsername(username: string): Promise<UserPublic | null> {
-    const user = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.username, username),
-      columns: {
-        id: true,
-        email: true,
-        username: true,
-        isActive: true,
-        isVerified: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
+    const user = await userRepository.findByUsername(username);
     return user || null;
   }
 
@@ -142,16 +67,7 @@ export class UserService {
    * Check if email exists (optionally excluding a user ID)
    */
   async checkEmailExists(email: string, excludeUserId?: string): Promise<boolean> {
-    const existing = await db.query.users.findFirst({
-      where: (users, { eq, and, ne }) => {
-        if (excludeUserId) {
-          return and(eq(users.email, email), ne(users.id, excludeUserId));
-        }
-        return eq(users.email, email);
-      },
-      columns: { id: true },
-    });
-
+    const existing = await userRepository.checkEmailExists(email, excludeUserId);
     return !!existing;
   }
 
@@ -159,16 +75,7 @@ export class UserService {
    * Check if username exists (optionally excluding a user ID)
    */
   async checkUsernameExists(username: string, excludeUserId?: string): Promise<boolean> {
-    const existing = await db.query.users.findFirst({
-      where: (users, { eq, and, ne }) => {
-        if (excludeUserId) {
-          return and(eq(users.username, username), ne(users.id, excludeUserId));
-        }
-        return eq(users.username, username);
-      },
-      columns: { id: true },
-    });
-
+    const existing = await userRepository.checkUsernameExists(username, excludeUserId);
     return !!existing;
   }
 
@@ -193,23 +100,11 @@ export class UserService {
     const passwordHash = await bcrypt.hash(data.passwordHash, BCRYPT_ROUNDS);
 
     try {
-      const [user] = await db
-        .insert(users)
-        .values({
-          email: data.email,
-          username: data.username,
-          passwordHash,
-        })
-        .returning({
-          id: users.id,
-          email: users.email,
-          username: users.username,
-          isActive: users.isActive,
-          isVerified: users.isVerified,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt,
-        });
-
+      const [user] = await userRepository.insertUser({
+        email: data.email,
+        username: data.username,
+        passwordHash,
+      });
       return user;
     }
     catch (error) {
@@ -253,7 +148,7 @@ export class UserService {
     }
 
     // Prepare update data
-    const updateData: Partial<typeof users.$inferInsert> = {};
+    const updateData: Record<string, unknown> = {};
 
     if (data.email) {
       updateData.email = data.email;
@@ -276,20 +171,7 @@ export class UserService {
     updateData.updatedAt = new Date();
 
     try {
-      const [user] = await db
-        .update(users)
-        .set(updateData)
-        .where(eq(users.id, id))
-        .returning({
-          id: users.id,
-          email: users.email,
-          username: users.username,
-          isActive: users.isActive,
-          isVerified: users.isVerified,
-          createdAt: users.createdAt,
-          updatedAt: users.updatedAt,
-        });
-
+      const [user] = await userRepository.updateUser(id, updateData);
       return user;
     }
     catch (error) {
@@ -315,7 +197,7 @@ export class UserService {
       throw new NotFoundException("User not found");
     }
 
-    await db.delete(users).where(eq(users.id, id));
+    await userRepository.deleteUser(id);
   }
 
   /**
@@ -324,23 +206,10 @@ export class UserService {
   async deactivate(id: string): Promise<UserPublic> {
     const _user = await this.findById(id); // This throws if not found
 
-    const [updatedUser] = await db
-      .update(users)
-      .set({
-        isActive: false,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, id))
-      .returning({
-        id: users.id,
-        email: users.email,
-        username: users.username,
-        isActive: users.isActive,
-        isVerified: users.isVerified,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
-      });
-
+    const [updatedUser] = await userRepository.updateUser(id, {
+      isActive: false,
+      updatedAt: new Date(),
+    });
     return updatedUser;
   }
 
@@ -350,23 +219,10 @@ export class UserService {
   async activate(id: string): Promise<UserPublic> {
     const _user = await this.findById(id); // This throws if not found
 
-    const [updatedUser] = await db
-      .update(users)
-      .set({
-        isActive: true,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, id))
-      .returning({
-        id: users.id,
-        email: users.email,
-        username: users.username,
-        isActive: users.isActive,
-        isVerified: users.isVerified,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
-      });
-
+    const [updatedUser] = await userRepository.updateUser(id, {
+      isActive: true,
+      updatedAt: new Date(),
+    });
     return updatedUser;
   }
 }
