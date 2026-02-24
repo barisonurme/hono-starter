@@ -25,6 +25,8 @@ const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.string().optional(),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
+  GMAIL_USER: z.string().email(),
+  GMAIL_APP_PASSWORD: z.string().min(16),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

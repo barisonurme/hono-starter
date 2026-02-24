@@ -2,6 +2,7 @@ import type { UserPrivate, UserPublic } from "@/models/user.model";
 
 import { NotFoundException, UnauthorizedException } from "@/exceptions/http-exceptions";
 import { userRepository } from "@/models/user.repo";
+import { verificationService } from "@/services/verification.service";
 import { jwtGenerateAccessToken, jwtGenerateRefreshToken, jwtVerifyToken } from "@/utils";
 
 export class AuthService {
@@ -15,11 +16,7 @@ export class AuthService {
     return user;
   }
 
-  async validatePassword(
-    email: string,
-    password: string,
-    isLoginRequest?: boolean,
-  ): Promise<{ user: UserPublic; accessToken: string; refreshToken: string }> {
+  async validatePassword(email: string, password: string, isLoginRequest?: boolean): Promise<void> {
     const user = await this.validateUser(email, isLoginRequest);
 
     if (!password) {
@@ -29,21 +26,32 @@ export class AuthService {
     const isPasswordValid = await userRepository.validatePasswordWithEmail(email, password);
 
     if (!isPasswordValid) {
-      throw new NotFoundException("Invalid password");
+      throw new NotFoundException("Invalid credentials");
     }
 
+    if (!user.isVerified) {
+      throw new UnauthorizedException("Email not verified. Please verify your email before logging in.");
+    }
+
+    await verificationService.sendLoginCode(user.id, user.email);
+  }
+
+  async confirmLogin(email: string, code: string): Promise<{ user: UserPublic; accessToken: string; refreshToken: string }> {
+    const user = await userRepository.findByEmailWithPassword(email);
+
+    if (!user) {
+      throw new NotFoundException("Invalid credentials");
+    }
+
+    await verificationService.verifyLoginCode(user.id, code);
+
     const { passwordHash: _password, ...publicUser } = user;
-
-    /* Generate JWT tokens */
     const jwtPayload = { id: user.id, email: user.email };
-
-    const accessToken = jwtGenerateAccessToken(jwtPayload);
-    const refreshToken = jwtGenerateRefreshToken(jwtPayload);
 
     return {
       user: publicUser,
-      accessToken,
-      refreshToken,
+      accessToken: jwtGenerateAccessToken(jwtPayload),
+      refreshToken: jwtGenerateRefreshToken(jwtPayload),
     };
   }
 

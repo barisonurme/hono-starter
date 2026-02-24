@@ -8,6 +8,7 @@ import { ConflictException, NotFoundException } from "@/exceptions/http-exceptio
 import { userRepository } from "@/models/user.repo";
 
 import { hashPassword, isPostgresError } from "../utils";
+import { verificationService } from "./verification.service";
 
 export type FindAllOptions = {
   limit?: number;
@@ -104,6 +105,9 @@ export class UserService {
         username: data.username,
         passwordHash,
       });
+
+      verificationService.sendVerificationCode(user.id, user.email).catch(() => {});
+
       return user;
     }
     catch (error) {

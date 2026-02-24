@@ -2,24 +2,31 @@ import { getCookie } from "hono/cookie";
 import * as HttpStatusCodes from "stoker/http-status-codes";
 
 import type { TRouteHandler } from "@/core/types/app-types";
-import type { TLoginRoute, TLogoutRoute, TRefreshRoute } from "@/routes/auth/auth.route";
+import type { TConfirmLoginRoute, TLoginRoute, TLogoutRoute, TRefreshRoute, TRegisterRoute, TVerifyEmailRoute } from "@/routes/auth/auth.route";
 
 import { clearAuthCookies, setAccessTokenCookie, setRefreshTokenCookie } from "@/core/cookies";
 import { UnauthorizedException } from "@/exceptions/http-exceptions";
 import { authService } from "@/services/auth.service";
+import { userService } from "@/services/user.service";
+import { verificationService } from "@/services/verification.service";
+
+export const register: TRouteHandler<TRegisterRoute> = async (c) => {
+  const data = c.req.valid("json");
+  const user = await userService.create(data);
+  return c.json(user, HttpStatusCodes.CREATED);
+};
 
 export const login: TRouteHandler<TLoginRoute> = async (c) => {
-  const data = c.req.valid("json");
-  const { email, passwordHash } = data;
+  const { email, passwordHash } = c.req.valid("json");
+  await authService.validatePassword(email, passwordHash, true);
+  return c.json({ message: "Verification code sent to email" }, HttpStatusCodes.OK);
+};
 
-  // Validate credentials - throws exception if invalid (cookies won't be set)
-  const { user, accessToken, refreshToken } = await authService.validatePassword(email, passwordHash, true);
-
-  // Set tokens in HTTP-only cookies (only reached if validation succeeds)
+export const confirmLogin: TRouteHandler<TConfirmLoginRoute> = async (c) => {
+  const { email, code } = c.req.valid("json");
+  const { user, accessToken, refreshToken } = await authService.confirmLogin(email, code);
   setAccessTokenCookie(c, accessToken);
   setRefreshTokenCookie(c, refreshToken);
-
-  // Return user without tokens
   return c.json(user, HttpStatusCodes.OK);
 };
 
@@ -42,4 +49,11 @@ export const refresh: TRouteHandler<TRefreshRoute> = async (c) => {
   setRefreshTokenCookie(c, newRefreshToken);
 
   return c.json({ message: "Token refreshed successfully" }, HttpStatusCodes.OK);
+};
+
+
+export const verifyEmail: TRouteHandler<TVerifyEmailRoute> = async (c) => {
+  const { email, code } = c.req.valid("json");
+  await verificationService.verifyCode(email, code);
+  return c.json({ message: "Email verified successfully" }, HttpStatusCodes.OK);
 };

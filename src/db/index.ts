@@ -4,6 +4,7 @@ import { Pool } from "pg";
 import env from "@/core/env";
 
 import * as userDbSchema from "./user-db-schema";
+import * as verificationDbSchema from "./verification-db-schema";
 
 const pool = new Pool({
   connectionString: env.DATABASE_URL,
@@ -12,5 +13,6 @@ const pool = new Pool({
 export const db = drizzle(pool, {
   schema: {
     ...userDbSchema,
+    ...verificationDbSchema,
   },
 });
