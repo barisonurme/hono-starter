@@ -6,6 +6,7 @@ import type { CreateUserInput, UpdateUserInput } from "@/schemas/user.schema";
 import { POSTGRES_UNIQUE_VIOLATION_CODE } from "@/core/constants/constants";
 import { ConflictException, NotFoundException } from "@/exceptions/http-exceptions";
 import { userRepository } from "@/models/user.repo";
+import { verificationRepository } from "@/models/verification.repo";
 
 import { hashPassword, isPostgresError } from "../utils";
 import { verificationService } from "./verification.service";
@@ -84,10 +85,20 @@ export class UserService {
    * Note: passwordHash field name is misleading - it expects plain password
    */
   async create(data: CreateUserInput): Promise<UserPublic> {
-    // Check if email already exists
-    const emailExists = await this.checkEmailExists(data.email);
-    if (emailExists) {
-      throw new ConflictException("Email already registered");
+    const existingUser = await userRepository.findByEmail(data.email);
+
+    if (existingUser) {
+      if (existingUser.isVerified) {
+        throw new ConflictException("Email already registered");
+      }
+
+      const validCode = await verificationRepository.hasValidCode(existingUser.id);
+      if (validCode) {
+        throw new ConflictException("Verification email already sent. Please check your inbox.");
+      }
+
+      // Unverified + expired code — remove stale account so they can re-register
+      await userRepository.deleteUser(existingUser.id);
     }
 
     // Check if username already exists
@@ -97,13 +108,13 @@ export class UserService {
     }
 
     // Hash the password (field name suggests it's already hashed, but we hash it here)
-    const passwordHash = await hashPassword(data.passwordHash);
+    const password = await hashPassword(data.password);
 
     try {
       const [user] = await userRepository.insertUser({
         email: data.email,
         username: data.username,
-        passwordHash,
+        password,
       });
 
       verificationService.sendVerificationCode(user.id, user.email).catch(() => {});
@@ -162,8 +173,8 @@ export class UserService {
     }
 
     // Hash password if provided (field name suggests it's already hashed, but we hash it here)
-    if (data.passwordHash) {
-      updateData.passwordHash = await hashPassword(data.passwordHash);
+    if (data.password) {
+      updateData.password = await hashPassword(data.password);
     }
 
     // Only update if there's something to update

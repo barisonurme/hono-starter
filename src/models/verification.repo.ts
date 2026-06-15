@@ -22,6 +22,17 @@ export class VerificationRepository {
     });
   }
 
+  hasValidCode(userId: string) {
+    return db.query.emailVerifications.findFirst({
+      where: and(
+        eq(emailVerifications.userId, userId),
+        isNull(emailVerifications.usedAt),
+        gt(emailVerifications.expiresAt, new Date()),
+      ),
+      columns: { id: true },
+    });
+  }
+
   markUsed(id: string) {
     return db
       .update(emailVerifications)

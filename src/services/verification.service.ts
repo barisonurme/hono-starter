@@ -1,3 +1,5 @@
+import type { UserPublic } from "@/models/user.model";
+
 import { BadRequestException } from "@/exceptions/http-exceptions";
 import { userRepository } from "@/models/user.repo";
 import { verificationRepository } from "@/models/verification.repo";
@@ -25,7 +27,7 @@ export class VerificationService {
     );
   }
 
-  async verifyCode(email: string, code: string): Promise<void> {
+  async verifyCode(email: string, code: string): Promise<UserPublic> {
     const user = await userRepository.findByEmail(email);
 
     if (!user) {
@@ -39,7 +41,8 @@ export class VerificationService {
     }
 
     await verificationRepository.markUsed(record.id);
-    await userRepository.updateUser(user.id, { isVerified: true, updatedAt: new Date() });
+    const [verified] = await userRepository.updateUser(user.id, { isVerified: true, updatedAt: new Date() });
+    return verified;
   }
 
   async sendLoginCode(userId: string, email: string): Promise<void> {

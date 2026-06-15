@@ -64,7 +64,7 @@ export class UserRepository {
         isVerified: true,
         createdAt: true,
         updatedAt: true,
-        passwordHash: true,
+        password: true,
       },
     });
   }
@@ -138,7 +138,7 @@ export class UserRepository {
       return false;
     }
 
-    return verifyPassword(password, user.passwordHash);
+    return verifyPassword(password, user.password);
   }
 
   deleteUser(id: string) {

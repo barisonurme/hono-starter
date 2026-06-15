@@ -45,7 +45,7 @@ export class AuthService {
 
     await verificationService.verifyLoginCode(user.id, code);
 
-    const { passwordHash: _password, ...publicUser } = user;
+    const { password: _password, ...publicUser } = user;
     const jwtPayload = { id: user.id, email: user.email };
 
     return {

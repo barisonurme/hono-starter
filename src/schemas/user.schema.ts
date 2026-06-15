@@ -8,7 +8,7 @@ import { users } from "@/db/user-db-schema";
 
 export const loginUserSchema = createInsertSchema(users, {
   email: schema => schema.email(),
-  passwordHash: schema => schema.min(8),
+  password: schema => schema.min(8),
 }).omit({
   id: true,
   isActive: true,
@@ -21,7 +21,7 @@ export const loginUserSchema = createInsertSchema(users, {
 export const createUserSchema = createInsertSchema(users, {
   username: schema => schema.min(3),
   email: schema => schema.email(),
-  passwordHash: schema => schema.min(8),
+  password: schema => schema.min(8),
 }).omit({
   id: true,
   isActive: true,
@@ -31,7 +31,7 @@ export const createUserSchema = createInsertSchema(users, {
 });
 
 export const userResponseSchema = createSelectSchema(users).omit({
-  passwordHash: true,
+  password: true,
 });
 
 export const userIdParamsSchema = createSelectSchema(users).pick({
@@ -41,19 +41,19 @@ export const userIdParamsSchema = createSelectSchema(users).pick({
 export const updateUserSchema = z.object({
   username: z.string().min(3).optional(),
   email: z.string().email().optional(),
-  passwordHash: z.string().min(8).optional(),
+  password: z.string().min(8).optional(),
 }).refine(data => Object.keys(data).length > 0, {
   message: "At least one field must be provided for update",
 });
 
 export const selectUsersSchema = createSelectSchema(users).omit({
-  passwordHash: true,
+  password: true,
 });
 
 export const insertUsersSchema = createInsertSchema(users, {
   username: schema => schema.min(3),
   email: schema => schema.email(),
-  passwordHash: schema => schema.min(8),
+  password: schema => schema.min(8),
 }).omit({
   id: true,
   isActive: true,

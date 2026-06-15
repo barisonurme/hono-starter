@@ -9,6 +9,7 @@ import { UnauthorizedException } from "@/exceptions/http-exceptions";
 import { authService } from "@/services/auth.service";
 import { userService } from "@/services/user.service";
 import { verificationService } from "@/services/verification.service";
+import { jwtGenerateAccessToken, jwtGenerateRefreshToken } from "@/utils";
 
 export const register: TRouteHandler<TRegisterRoute> = async (c) => {
   const data = c.req.valid("json");
@@ -17,8 +18,8 @@ export const register: TRouteHandler<TRegisterRoute> = async (c) => {
 };
 
 export const login: TRouteHandler<TLoginRoute> = async (c) => {
-  const { email, passwordHash } = c.req.valid("json");
-  await authService.validatePassword(email, passwordHash, true);
+  const { email, password } = c.req.valid("json");
+  await authService.validatePassword(email, password, true);
   return c.json({ message: "Verification code sent to email" }, HttpStatusCodes.OK);
 };
 
@@ -51,9 +52,14 @@ export const refresh: TRouteHandler<TRefreshRoute> = async (c) => {
   return c.json({ message: "Token refreshed successfully" }, HttpStatusCodes.OK);
 };
 
-
 export const verifyEmail: TRouteHandler<TVerifyEmailRoute> = async (c) => {
   const { email, code } = c.req.valid("json");
-  await verificationService.verifyCode(email, code);
-  return c.json({ message: "Email verified successfully" }, HttpStatusCodes.OK);
+  const user = await verificationService.verifyCode(email, code);
+  const jwtPayload = { id: user.id, email: user.email };
+
+  // Set new tokens in HTTP-only cookies
+  setAccessTokenCookie(c, jwtGenerateAccessToken(jwtPayload));
+  setRefreshTokenCookie(c, jwtGenerateRefreshToken(jwtPayload));
+
+  return c.json({ message: "Email verified" }, HttpStatusCodes.OK);
 };

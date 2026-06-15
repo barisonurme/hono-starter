@@ -27,12 +27,11 @@ export function isPostgresError(error: unknown): error is PostgresError {
 *
 */
 export async function hashPassword(plainPassword: string) {
-  const passwordHash = await bcrypt.hash(plainPassword, BCRYPT_ROUNDS);
-  return passwordHash;
+  return bcrypt.hash(plainPassword, BCRYPT_ROUNDS);
 }
 
-export function verifyPassword(plainPassword: string, passwordHash: string) {
-  return bcrypt.compare(plainPassword, passwordHash);
+export function verifyPassword(plainPassword: string, hash: string) {
+  return bcrypt.compare(plainPassword, hash);
 }
 
 /*
