@@ -50,7 +50,7 @@ export const create = createRoute({
       "The created user.",
     ),
     [HttpStatusCodes.CONFLICT]: jsonContent(
-      createMessageObjectSchema("Email or username already exists"),
+      createMessageObjectSchema("email_or_username_already_exists"),
       "Conflict error - email or username already registered.",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
@@ -105,7 +105,7 @@ export const update = createRoute({
       HttpStatusPhrases.NOT_FOUND,
     ),
     [HttpStatusCodes.CONFLICT]: jsonContent(
-      createMessageObjectSchema("Email or username already exists"),
+      createMessageObjectSchema("email_or_username_already_exists"),
       "Conflict error - email or username already registered.",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(

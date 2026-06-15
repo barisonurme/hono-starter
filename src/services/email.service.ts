@@ -7,7 +7,7 @@ export class EmailService {
       await sendMail({ to, subject, html });
     }
     catch {
-      throw new InternalServerErrorException("Failed to send email");
+      throw new InternalServerErrorException("failed_to_send_email");
     }
   }
 }

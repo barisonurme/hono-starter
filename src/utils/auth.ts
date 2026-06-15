@@ -11,7 +11,7 @@ import { UnauthorizedException } from "@/exceptions/http-exceptions";
 export function getAuthenticatedUser(c: Context<TAppBindings>) {
   const user = c.get("user");
   if (!user) {
-    throw new UnauthorizedException("User not authenticated");
+    throw new UnauthorizedException("user_not_authenticated");
   }
   return user;
 }

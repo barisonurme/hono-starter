@@ -20,7 +20,7 @@ export const register: TRouteHandler<TRegisterRoute> = async (c) => {
 export const login: TRouteHandler<TLoginRoute> = async (c) => {
   const { email, password } = c.req.valid("json");
   await authService.validatePassword(email, password, true);
-  return c.json({ message: "Verification code sent to email" }, HttpStatusCodes.OK);
+  return c.json({ message: "verification_code_sent" }, HttpStatusCodes.OK);
 };
 
 export const confirmLogin: TRouteHandler<TConfirmLoginRoute> = async (c) => {
@@ -33,14 +33,14 @@ export const confirmLogin: TRouteHandler<TConfirmLoginRoute> = async (c) => {
 
 export const logout: TRouteHandler<TLogoutRoute> = async (c) => {
   clearAuthCookies(c);
-  return c.json({ message: "Logout successful" }, HttpStatusCodes.OK);
+  return c.json({ message: "logout_successful" }, HttpStatusCodes.OK);
 };
 
 export const refresh: TRouteHandler<TRefreshRoute> = async (c) => {
   const refreshToken = getCookie(c, "refreshToken");
 
   if (!refreshToken) {
-    throw new UnauthorizedException("Refresh token not found");
+    throw new UnauthorizedException("refresh_token_not_found");
   }
 
   const { accessToken, refreshToken: newRefreshToken } = await authService.refreshTokens(refreshToken);
@@ -49,7 +49,7 @@ export const refresh: TRouteHandler<TRefreshRoute> = async (c) => {
   setAccessTokenCookie(c, accessToken);
   setRefreshTokenCookie(c, newRefreshToken);
 
-  return c.json({ message: "Token refreshed successfully" }, HttpStatusCodes.OK);
+  return c.json({ message: "token_refreshed" }, HttpStatusCodes.OK);
 };
 
 export const verifyEmail: TRouteHandler<TVerifyEmailRoute> = async (c) => {
@@ -61,5 +61,5 @@ export const verifyEmail: TRouteHandler<TVerifyEmailRoute> = async (c) => {
   setAccessTokenCookie(c, jwtGenerateAccessToken(jwtPayload));
   setRefreshTokenCookie(c, jwtGenerateRefreshToken(jwtPayload));
 
-  return c.json({ message: "Email verified" }, HttpStatusCodes.OK);
+  return c.json({ message: "email_verified" }, HttpStatusCodes.OK);
 };

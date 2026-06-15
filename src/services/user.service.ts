@@ -34,7 +34,7 @@ export class UserService {
     const user = await userRepository.findById(id);
 
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException("user_not_found");
     }
 
     return user;
@@ -89,12 +89,12 @@ export class UserService {
 
     if (existingUser) {
       if (existingUser.isVerified) {
-        throw new ConflictException("Email already registered");
+        throw new ConflictException("email_already_registered");
       }
 
       const validCode = await verificationRepository.hasValidCode(existingUser.id);
       if (validCode) {
-        throw new ConflictException("Verification email already sent. Please check your inbox.");
+        throw new ConflictException("verification_email_already_sent");
       }
 
       // Unverified + expired code — remove stale account so they can re-register
@@ -104,7 +104,7 @@ export class UserService {
     // Check if username already exists
     const usernameExists = await this.checkUsernameExists(data.username);
     if (usernameExists) {
-      throw new ConflictException("Username already taken");
+      throw new ConflictException("username_already_taken");
     }
 
     // Hash the password (field name suggests it's already hashed, but we hash it here)
@@ -125,10 +125,10 @@ export class UserService {
       // Handle race condition - database constraint violation
       if (isPostgresError(error) && error.code === POSTGRES_UNIQUE_VIOLATION_CODE) {
         if (error.constraint?.includes("email")) {
-          throw new ConflictException("Email already registered");
+          throw new ConflictException("email_already_registered");
         }
         if (error.constraint?.includes("username")) {
-          throw new ConflictException("Username already taken");
+          throw new ConflictException("username_already_taken");
         }
       }
       throw error;
@@ -142,14 +142,14 @@ export class UserService {
     // Check if user exists
     const existingUser = await this.findByIdOrNull(id);
     if (!existingUser) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException("user_not_found");
     }
 
     // Check for email conflicts if email is being updated
     if (data.email && data.email !== existingUser.email) {
       const emailExists = await this.checkEmailExists(data.email, id);
       if (emailExists) {
-        throw new ConflictException("Email already registered");
+        throw new ConflictException("email_already_registered");
       }
     }
 
@@ -157,7 +157,7 @@ export class UserService {
     if (data.username && data.username !== existingUser.username) {
       const usernameExists = await this.checkUsernameExists(data.username, id);
       if (usernameExists) {
-        throw new ConflictException("Username already taken");
+        throw new ConflictException("username_already_taken");
       }
     }
 
@@ -192,10 +192,10 @@ export class UserService {
       // Handle race condition - database constraint violation
       if (isPostgresError(error) && error.code === POSTGRES_UNIQUE_VIOLATION_CODE) {
         if (error.constraint?.includes("email")) {
-          throw new ConflictException("Email already registered");
+          throw new ConflictException("email_already_registered");
         }
         if (error.constraint?.includes("username")) {
-          throw new ConflictException("Username already taken");
+          throw new ConflictException("username_already_taken");
         }
       }
       throw error;
@@ -208,7 +208,7 @@ export class UserService {
   async delete(id: string): Promise<void> {
     const existingUser = await this.findByIdOrNull(id);
     if (!existingUser) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException("user_not_found");
     }
 
     await userRepository.deleteUser(id);

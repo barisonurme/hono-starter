@@ -31,13 +31,13 @@ export class VerificationService {
     const user = await userRepository.findByEmail(email);
 
     if (!user) {
-      throw new BadRequestException("Invalid or expired verification code");
+      throw new BadRequestException("invalid_or_expired_verification_code");
     }
 
     const record = await verificationRepository.findValidCode(user.id, code);
 
     if (!record) {
-      throw new BadRequestException("Invalid or expired verification code");
+      throw new BadRequestException("invalid_or_expired_verification_code");
     }
 
     await verificationRepository.markUsed(record.id);
@@ -63,7 +63,7 @@ export class VerificationService {
     const record = await verificationRepository.findValidCode(userId, code);
 
     if (!record) {
-      throw new BadRequestException("Invalid or expired login code");
+      throw new BadRequestException("invalid_or_expired_login_code");
     }
 
     await verificationRepository.markUsed(record.id);

@@ -10,7 +10,7 @@ export class AuthService {
     const user = await userRepository.findByEmailWithPassword(email);
 
     if (!user) {
-      throw new NotFoundException(isLoginRequest ? "Invalid credentials" : "User not found");
+      throw new NotFoundException(isLoginRequest ? "invalid_credentials" : "User not found");
     }
 
     return user;
@@ -20,17 +20,17 @@ export class AuthService {
     const user = await this.validateUser(email, isLoginRequest);
 
     if (!password) {
-      throw new NotFoundException("Password is required");
+      throw new NotFoundException("password_required");
     }
 
     const isPasswordValid = await userRepository.validatePasswordWithEmail(email, password);
 
     if (!isPasswordValid) {
-      throw new NotFoundException("Invalid credentials");
+      throw new NotFoundException("invalid_credentials");
     }
 
     if (!user.isVerified) {
-      throw new UnauthorizedException("Email not verified. Please verify your email before logging in.");
+      throw new UnauthorizedException("email_not_verified");
     }
 
     await verificationService.sendLoginCode(user.id, user.email);
@@ -40,7 +40,7 @@ export class AuthService {
     const user = await userRepository.findByEmailWithPassword(email);
 
     if (!user) {
-      throw new NotFoundException("Invalid credentials");
+      throw new NotFoundException("invalid_credentials");
     }
 
     await verificationService.verifyLoginCode(user.id, code);
@@ -60,13 +60,13 @@ export class AuthService {
       const decoded = jwtVerifyToken(refreshToken);
 
       if (!decoded.id || !decoded.email) {
-        throw new UnauthorizedException("Invalid token payload");
+        throw new UnauthorizedException("invalid_token_payload");
       }
 
       // Verify user still exists
       const user = await userRepository.findByEmail(decoded.email as string);
       if (!user) {
-        throw new UnauthorizedException("User not found");
+        throw new UnauthorizedException("user_not_found");
       }
 
       // Generate new tokens
@@ -83,7 +83,7 @@ export class AuthService {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      throw new UnauthorizedException("Invalid or expired refresh token");
+      throw new UnauthorizedException("invalid_or_expired_refresh_token");
     }
   }
 }

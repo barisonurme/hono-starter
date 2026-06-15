@@ -24,7 +24,7 @@ export const errorHandler: ErrorHandler = (err, c) => {
     error: err,
   });
   return c.json(
-    { message: "Internal Server Error" },
+    { message: "internal_server_error" },
     HttpStatusCodes.INTERNAL_SERVER_ERROR,
   );
 };

@@ -15,14 +15,14 @@ export const authMiddleware: MiddlewareHandler<TAppBindings> = async (c, next) =
   const accessToken = getCookie(c, "accessToken");
 
   if (!accessToken) {
-    throw new UnauthorizedException("Access token not found");
+    throw new UnauthorizedException("access_token_not_found");
   }
 
   try {
     const decoded = jwtVerifyToken(accessToken);
 
     if (!decoded.id || !decoded.email) {
-      throw new UnauthorizedException("Invalid token payload");
+      throw new UnauthorizedException("invalid_token_payload");
     }
 
     // Add user info to context
@@ -37,6 +37,6 @@ export const authMiddleware: MiddlewareHandler<TAppBindings> = async (c, next) =
     if (error instanceof UnauthorizedException) {
       throw error;
     }
-    throw new UnauthorizedException("Invalid or expired access token");
+    throw new UnauthorizedException("invalid_or_expired_access_token");
   }
 };

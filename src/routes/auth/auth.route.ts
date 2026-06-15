@@ -21,7 +21,7 @@ export const register = createRoute({
       "User registered successfully.",
     ),
     [HttpStatusCodes.CONFLICT]: jsonContent(
-      createMessageObjectSchema("Email or username already exists"),
+      createMessageObjectSchema("email_or_username_already_exists"),
       "Conflict error - email or username already registered.",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
@@ -42,15 +42,15 @@ export const login = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createMessageObjectSchema("Verification code sent to email"),
+      createMessageObjectSchema("verification_code_sent"),
       "Credentials valid — verification code sent.",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createMessageObjectSchema("Invalid credentials"),
+      createMessageObjectSchema("invalid_credentials"),
       "Invalid credentials.",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      createMessageObjectSchema("Email not verified"),
+      createMessageObjectSchema("email_not_verified"),
       "Email not verified.",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
@@ -75,11 +75,11 @@ export const confirmLogin = createRoute({
       "Login confirmed — auth cookies set.",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createMessageObjectSchema("Invalid or expired login code"),
+      createMessageObjectSchema("invalid_or_expired_login_code"),
       "Invalid or expired code.",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createMessageObjectSchema("Invalid credentials"),
+      createMessageObjectSchema("invalid_credentials"),
       "User not found.",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
@@ -97,7 +97,7 @@ export const logout = createRoute({
   method: "post",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createMessageObjectSchema("Logout successful"),
+      createMessageObjectSchema("logout_successful"),
       "User logout successful.",
     ),
   },
@@ -111,11 +111,11 @@ export const refresh = createRoute({
   method: "post",
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createMessageObjectSchema("Token refreshed successfully"),
+      createMessageObjectSchema("token_refreshed"),
       "Access token refreshed successfully.",
     ),
     [HttpStatusCodes.UNAUTHORIZED]: jsonContent(
-      createMessageObjectSchema("Invalid or expired refresh token"),
+      createMessageObjectSchema("invalid_or_expired_refresh_token"),
       "Unauthorized - invalid or expired refresh token.",
     ),
   },
@@ -132,15 +132,15 @@ export const verifyEmail = createRoute({
   },
   responses: {
     [HttpStatusCodes.OK]: jsonContent(
-      createMessageObjectSchema("Email verified"),
+      createMessageObjectSchema("email_verified"),
       "Email verified successfully.",
     ),
     [HttpStatusCodes.BAD_REQUEST]: jsonContent(
-      createMessageObjectSchema("Invalid or expired verification code"),
+      createMessageObjectSchema("invalid_or_expired_verification_code"),
       "Invalid or expired verification code.",
     ),
     [HttpStatusCodes.NOT_FOUND]: jsonContent(
-      createMessageObjectSchema("User not found"),
+      createMessageObjectSchema("user_not_found"),
       "User not found.",
     ),
     [HttpStatusCodes.UNPROCESSABLE_ENTITY]: jsonContent(
